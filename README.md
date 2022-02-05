@@ -1,4 +1,3 @@
-# Microbiome dynamics in the presence of ecological memory
 This folder contains all the codes needed to reproduce the results of the article "Quantifying the impact of ecological memory on the dynamics of
 interacting communities."
 
