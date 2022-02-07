@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5979561.svg)](https://doi.org/10.5281/zenodo.5979561)
+
 This folder contains all the codes needed to reproduce the results of the article 
 
 "Quantifying the impact of ecological memory on the dynamics of interacting communities" 
