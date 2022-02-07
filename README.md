@@ -1,6 +1,8 @@
 This folder contains all the codes needed to reproduce the results of the article "Quantifying the impact of ecological memory on the dynamics of
 interacting communities."
 
+Authors: Moein Khalighi1, Guilhem Sommeria-Klein, Didier Gonze, Karoline Faust, Leo Lahti 
+
 DOI for the source code: 10.5281/zenodo.5979561
 
 Correspondence: moein.khalighi@utu.fi
