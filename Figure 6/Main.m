@@ -1,4 +1,4 @@
-%% Figure S15
+%% Figure 6
 clear
 clc
 

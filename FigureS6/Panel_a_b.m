@@ -1,4 +1,4 @@
-%% Figure S3 panel a and b
+%% Figure S6 panel a and b
 %        ------------------------------------------------------------------
 %                   This code solves a there species microbial community model
 %                   described by fractional differential equations:

@@ -1,4 +1,4 @@
-%% Figure S3 panel c and d
+%% Figure S6 panel c and d
 % BT BU  
 clear 
 clc

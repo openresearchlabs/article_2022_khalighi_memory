@@ -1,5 +1,5 @@
-%% Figure S3 panel e
-% CH ER 
+%% Figure S6 panel f
+% BT CH
 clear 
 clc
 
@@ -7,22 +7,22 @@ global A mu
 
 %% Inputs
 
-p=1:-.1:.6; % order of derivatives
+p=1:-.1:.6; %order of derivatives
 
-X0= [0.4; 0.2]; % initial conditions
-mu=[.468 0.151]; % growth rates
+X0= [0.158;0.8]; % initial conditions
+mu=[.626 0.468]; % growth rates
 
-t0=0; % intial time
-T=20; % final time
+t0=0; % initial time
+T=200; % final time 
 h=.1; % step size for computing
 F=@fun; % ODE funcion described by Venturelli et. al. (https://doi.org/10.15252/msb.20178157)
 JF=@Jfun; % Jacobian of ODE
 
+A=[-0.9597 -0.0727; -0.5906 -1.242]; % interaction coefficients
 
-A=[-1.242 -.508; 1.191 -1.3219]; % interaction coefficients
 
+%% Solver for fractional differential equation
 
-%% Solver for fractional differential equation 
 for j=1:length(p)
     order=p(j)*ones(2,1);
 [t,x]=FDE_PI2_IM(order,F,JF,t0,T,X0,h);
@@ -31,15 +31,16 @@ X(j,:,:)=x;
 end
 
 %% plotting
+
 f1=figure;
 f1.Renderer='painters';
 
-% relative abundances
-x1(:,:)=X(1,:,:)./sum(X(1,:,:));
-x2(:,:)=X(2,:,:)./sum(X(2,:,:));
-x3(:,:)=X(3,:,:)./sum(X(3,:,:));
-x4(:,:)=X(4,:,:)./sum(X(4,:,:));
-x5(:,:)=X(5,:,:)./sum(X(5,:,:));
+x1(:,:)=X(1,:,:)./sum(X(1,:,:));x1=x1(:,1:20:end);
+x2(:,:)=X(2,:,:)./sum(X(2,:,:));x2=x2(:,1:20:end);
+x3(:,:)=X(3,:,:)./sum(X(3,:,:));x3=x3(:,1:20:end);
+x4(:,:)=X(4,:,:)./sum(X(4,:,:));x4=x4(:,1:20:end);
+x5(:,:)=X(5,:,:)./sum(X(5,:,:));x5=x5(:,1:20:end);
+t=t(:,1:20:end);
 
 hold on
 p1=plot(t,x1(1,:),'Color',[0,0,.7],'LineWidth',3,'DisplayName','0');
@@ -65,6 +66,5 @@ set(gca,'FontSize',14)
 % legend('0','0.1','0.2', '0.3', '0.4')
 
 leg = legend('show');
-title(leg,'CH    \mu   ER   \mu ')
+title(leg,'BT    \mu   CH   \mu ')
 leg.NumColumns = 2;
-leg.Location= 'best';
