@@ -6,6 +6,10 @@ global A mu
 %% inputs
 N=2;
 
+%convergence interval
+Tol= 2e-2; % for panel a
+% Tol= 7.7e-4; % for panel b
+
 order1=1:-.02:.9;% order of derivatives for BU
 order2=1:-.02:.9; % order of derivatives for BT
 
@@ -39,8 +43,7 @@ for i=1:M1
         
 [t,X]=FDE_PI2_IM([order1(i),order2(j)],F,JF,t0,T,X0,h,p);
 
-% indx=find(braycd(X(:,IndxP:end),X0)<7.7e-4);
-indx=find(braycd(X(:,IndxP:end),X0)<2e-2);
+indx=find(braycd(X(:,IndxP:end),X0)<Tol);
 ConvergT(i,j)=t(indx(1))+80;
     end
 end

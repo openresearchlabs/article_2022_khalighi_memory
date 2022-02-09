@@ -9,8 +9,9 @@ global A mu
 
 p=1:-.05:.8; %order of derivatives
 
-X0= [.28; .36];
-% X0= [.3; .36]; % initial conditions
+% initial conditions
+X0= [.28; .36]; % for panel a
+% X0= [.3; .36]; % for panel b
 mu=[0.599 0.626]; % growth rates
 
 t0=0; % Intial time

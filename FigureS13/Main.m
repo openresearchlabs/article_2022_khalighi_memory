@@ -6,6 +6,12 @@ global n N Ki b Kij
 %% Inputs
 % Coefficients and Conditions
 
+
+%convergence interval
+Tol= 2e-2; % for panel a
+% Tol= 1e-6; % for panel b
+
+
 N=2;
 
 order1=1:-.02:.9;
@@ -43,8 +49,7 @@ for i=1:M1
         
 [t,X]=FDE_PI12_PC([order1(i),order2(j)],F,t0,T,X0,h,p);
 
-% indx=find(braycd(X(:,IndxP:end),X0)<1e-6);
-indx=find(braycd(X(:,IndxP:end),X0)<2e-2);
+indx=find(braycd(X(:,IndxP:end),X0)<Tol);
 ConvergT(i,j)=t(indx(1))+100;
     end
 end
