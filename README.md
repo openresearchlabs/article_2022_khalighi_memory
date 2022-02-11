@@ -6,6 +6,8 @@ This folder contains all the codes needed to reproduce the results of the articl
 
 Moein Khalighi, Guilhem Sommeria-Klein, Didier Gonze, Karoline Faust, Leo Lahti 
 
+Link to the preprint: https://www.biorxiv.org/content/10.1101/2021.09.01.458486v1.abstract
+
 DOI for the code: 10.5281/zenodo.5979561
 
 The code is available with BSD 2-Clause License.
