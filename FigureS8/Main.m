@@ -1,22 +1,23 @@
 %% Figure S8
-% BU BT
+% CH ER 
 clear 
 clc
 %% Inputs
 global A mu
 
-order1=1:-.02:.84; % order of derivatives for BU
-order2=1:-.02:.84; % order of derivatives for BT
-X0= [.3; .37]; % initial values
-mu=[0.599 0.626]; %growth rates
+order1=1:-.01:.9; % order of derivatives for CH
+order2=1:-.01:.9; % order of derivatives for ER
+X0= [0.4; 0.2]; % initial abundances
+mu=[.468 0.151]; % growth rates
 
 t0=0; % initial time
-T=10000; % final time
-h=.1;% step size for computing
+T=1600; % final time 
+h=.1; % step size for computing
 F=@fun; % ODE funcion described by Venturelli et. al. (https://doi.org/10.15252/msb.20178157)
 JF=@Jfun; % Jacobian of ODE
 
-A=[-0.9059 -0.9377;-0.972 -0.9597]; % interaction coefficients
+
+A=[-1.242 -.508; 1.191 -1.3219]; % interaction matrix
 
 %% fix points
 xx1=[(A(1,2)*mu(2)-A(2,2)*mu(1))/(A(1,1)*A(2,2)-A(1,2)*A(2,1)),...
@@ -40,17 +41,17 @@ for i=1:M1
 Err=braycd(X(:,end),x12');
 [~,indFix]=min(Err);
 
-indx=find(braycd(X,x12(indFix,:)')<5e-3);
-ConvergT(i,j)=t(indx(1));
+indx=find(braycd(X(:,20/h:end),x12(indFix,:)')<1e-4);
+ConvergT(i,j)=t(indx(1))+20;
     end
 end
 
-%% plotting
+%% Plotting
 
 figure
 h=heatmap(1-order1,1-order2,ConvergT');
-h.XLabel = 'Memory of BU';
-h.YLabel = 'Memory of BT';
+h.XLabel = 'Memory of CH';
+h.YLabel = 'Memory of ER';
 
 ax = gca;
 axp = struct(ax);       %you will get a warning

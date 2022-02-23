@@ -6,6 +6,7 @@
 %                   where Fi=\prod[Kik^n/(Kik^n+Xk^n)], k=1,...,N and k~=i
 %                   D is the fractional Caputo derivative and mu is its order  
 %
+%  For a article titled "Quantifying the impact of ecological memory on the dynamics of interacting communities"         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Inputs                   
 %        ------------------------------------------------------------------
@@ -23,285 +24,259 @@
 %        ------------------------------------------------------------------
 %        x0 - Initial conditions, e.g. x0=[1/3;1/3;1/3];
 %        ------------------------------------------------------------------
-%        Perturbation - This is changes of the species growth rates, e.g. Perturbation='OUP';
-%                       Possible usages 'False', 'Pulse, 'Periodic', 'OUP', and 'OUP_new'                      
-%                       False: No perturbation
-%                       Pulse1: A pulse in (20,60) for Figure 2a
-%                       Pulse2: Similar to Pulse1 with a greater strength for Figure 2b
-%                       Pulse3: Two pulses in (60,100) and (200,330) for Figure 3a
-%                       Pulse4: Two pulses in (60,100) and (400,530) for Figure S2a
-%                       Periodic: Periodic perturbation with 20 span for Figure 3b
-%                       OUP: Stochastic pertubation used in the paper; requirement: T=<700, For Figure 4b-c & S2b                          
-%                       OUP_new: New generating stochastic perturbation
-%        ------------------------------------------------------------------
-%        b - Growth rates for cases: False, Pulse, and Periodic, e.g. b=[1, .95, 1.05];
+%        b - Growth rates (including pulse perturbations), e.g. b=[1, .95, 1.05];
 %
 %---------------------------------------
 % Outputs
 %        t - Simulated time interval
 %        x - Species abundances 
 %        B - Growth rates including perturbation
+%---------------------------------------
 %
 %
 %  Please, report any problem or comment to :
 %          moein dot khalighi at utu dot fi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear 
+
+clear
 clc
-global n N Ki b Kij bb
+global n N b Ki Kij
+
 %% Inputs
-% Coefficients and Conditions
 
-% [mu_B,mu_R,mu_G] Order of derivatives,  0<mu(i)=<1
-mu10=[1,1,1];  % for two pulses (panel a top)
-mu20=[1,1,1];  % for stochastic (panel b top)
-mu11=[1,1,1-.09105];      % for two pulses (panel a middle)
-mu21=[1,1,1-.2];  % for stochastic (panel b middle)
-mu12=[1,1,1-.09107];      % for two pulses (panel a bottom)
-mu22=[1,1-.1,1];      % for stochastic (panel b bottom)
-
+XB0=.005:.01:.05; % Initial abundances for blue species 
+NXB0=length(XB0);
 n=2; % Hill coefficient
-
 N=3; % number of species
-
 Kij=0.1*ones(N); % interaction matrix
-
 Ki=1*ones(N,1); % death rate
+t0=0; T=300; % t0 is start time, and T is the end time
+b=[4, .95, 1.05]; % growth rate
 
-T=700; %  final time
+alpha=[.6,.6,1]; % order of derivatives
+% alpha=[1,1,1]; % order of derivatives
 
-Perturbation='OUP'; % Possible usages 'False', 'Pulse1', 'Pulse2', 'Pulse3', 'Pulse4', 'Periodic', 'OUP', and 'OUP_new'
-
-b=[1, .95, 1.05]; % growth rates for cases: False, Pulse, and Periodic
-
-x01=[.99,.01,.01]'; % initial conditions
-x02=1/3*[1,1,1]'; % initial conditions
-
-Fun1=@fun14;
-Fun2=@fun3;
-        clear b        
-        load('b3OUP.mat');
-        bb=@(t,N)b(t,N);
-        B=b;
-        
-        t0=0; % initial time
 h=0.01; % step size for computing
+for i=1:2*NXB0
+    if i>NXB0
+    x0=[XB0(i-NXB0),.1,1]; % initial conditions
+    else
+    x0=[XB0(i),.3,.1]; % initial conditions
+    end
+[t, x] = FDE_PI12_PC(alpha,@fun,t0,T,x0',h);
+RelX=x./(ones(N,1)*sum(x)); % Relative abundances
 
+XB(i,:,:)=RelX;
+end
+%% panel b
 
-%% solver for fractional differential equation
-[t, x10] = FDE_PI12_PC(mu10,Fun1,t0,T,x01,h);
-[~, x20] = FDE_PI12_PC(mu20,Fun2,t0,T,x02,h);
-[~, x11] = FDE_PI12_PC(mu11,Fun1,t0,T,x01,h);
-[~, x21] = FDE_PI12_PC(mu21,Fun2,t0,T,x02,h);
-[~, x12] = FDE_PI12_PC(mu12,Fun1,t0,T,x01,h);
-[~, x22] = FDE_PI12_PC(mu22,Fun2,t0,T,x02,h);
-
-%% plotting
-
+f=figure;
+f.Position = [0 0 1800 500];
+f.Renderer='painters';
 % defining blindfriendly colors (red and green)
 PcR= [0.92,0.27,0.18];
 PcG= [0.18,0.40,0.14];
-
-   %%plotting relative abundance of species
-f=figure;
-f.Renderer='painters';
-     f = [1 2 3 4];
-    v = [60 0; 100 0; 100 1; 60 1];
-    v1 = [400 0; 530 0; 530 1; 400 1];
-    h1=patch('Faces',f,'Vertices',v,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.16);
+   
+%        ------------------------------------------------------------------    
+    % Plot the  abundance of species
     hold on
-    h2=patch('Faces',f,'Vertices',v1,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.36);
-    
-    RelX1=x10./(ones(N,1)*sum(x10)); % Relative abundances
-    
-    % Plot the relative abundances
-      p=plot(t,RelX1(1,:),'b');
-   hold on
-   p1=plot(t,RelX1(2,:),'color',PcR);
-   p2=plot(t,RelX1(3,:),'color',PcG);
-
-
-% Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-    % Remove highlighted bars from the legend
-    set(get(get(h1,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-    set(get(get(h2,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-       ylabel('Abundance')
-xlabel('Time')
-axis([0 T 0 1])
-
-set(p,'LineWidth',4)
-set(gca,'FontSize',18)
-xlabel('Time')
-%        ------------------------------------------------------------------
-
-box on
-
-%     ['X_{R}/X_{total}, Memory_R=',num2str(1-mu20(2))],...
-%     ['X_{G}/X_{total}, Memory_G=',num2str(1-mu20(3))],'Location', 'Best');')
-% legend(['X_{B}/X_{total}, Memory_B=',num2str(1-mu20(1))],...
-%     ['X_{R}/X_{total}, Memory_R=',num2str(1-mu20(2))],...
-%     ['X_{G}/X_{total}, Memory_G=',num2str(1-mu20(3))],'Location', 'Best');
-%%
-RelX2=x20./(ones(N,1)*sum(x20)); % Relative abundances
-
-f=figure;
-f.Renderer='painters';
-
-     
-   %%plotting relative abundance of species
-       
-            
-   p=plot(t,RelX2(1,:),'b');
-   hold on
-   p1=plot(t,RelX2(2,:),'color',PcR);
-   p2=plot(t,RelX2(3,:),'color',PcG);
-
-       ylabel('Abundance')
-
-
-% Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-set(gca,'FontSize',18)
-xlabel('Time')
-axis([0 T 0 1])
-
-% % Generate legend for showing memory of each species
-legend('X_{B}/X_{total}','X_{R}/X_{total}','X_{G}/X_{total}');
-%% plotting
-
-   %%plotting relative abundance of species
-f=figure;
-f.Renderer='painters';
-     f = [1 2 3 4];
-    v = [60 0; 100 0; 100 1; 60 1];
-    v1 = [400 0; 530 0; 530 1; 400 1];
-    h1=patch('Faces',f,'Vertices',v,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.16);
+    Xb(:,:)=XB(:,1,1:20:end);
+    Xr(:,:)=XB(:,2,1:20:end);
+    Xg(:,:)=XB(:,3,1:20:end);
+    tt=t(:,1:20:end);
+subplot(1,3,1)    
+for j=1:i
+    if j==2 || j==8
+%             p=semilogy(tt,Xb(j,:),'--b');
+                       
+    else
+%     p=semilogy(tt,Xb(j,:),'b');p.Color(4)=.3;
+    p=plot(tt,Xb(j,:),'b');p.Color(4)=.3;
+    end
     hold on
-    h2=patch('Faces',f,'Vertices',v1,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.36);
-    
-    RelX1=x11./(ones(N,1)*sum(x11)); % Relative abundances
-    
-    % Plot the relative abundances
-      p=plot(t,RelX1(1,:),'b');
-   hold on
-   p1=plot(t,RelX1(2,:),'color',PcR);
-   p2=plot(t,RelX1(3,:),'color',PcG);
-
-
-% Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-    % Remove highlighted bars from the legend
-    set(get(get(h1,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-    set(get(get(h2,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-       ylabel('Abundance')
-xlabel('Time')
-axis([0 T 0 1])
-
-set(p,'LineWidth',4)
-set(gca,'FontSize',18)
-xlabel('Time')
-%        ------------------------------------------------------------------
-
-box on
-%%
-%%
-RelX2=x21./(ones(N,1)*sum(x21)); % Relative abundances
-
-f=figure;
-f.Renderer='painters';
-
-     
-   %%plotting relative abundance of species
-       
-            
-   p=plot(t,RelX2(1,:),'b');
-   hold on
-   p1=plot(t,RelX2(2,:),'color',PcR);
-   p2=plot(t,RelX2(3,:),'color',PcG);
-
-       ylabel('Abundance')
-
-
-% Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-set(gca,'FontSize',18)
-xlabel('Time')
-axis([0 T 0 1])
-
-
-%%
-   %%plotting relative abundance of species
-f=figure;
-f.Renderer='painters';
-     f = [1 2 3 4];
-    v = [60 0; 100 0; 100 1; 60 1];
-    v1 = [400 0; 530 0; 530 1; 400 1];
-    h1=patch('Faces',f,'Vertices',v,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.16);
+    set(p,'LineWidth',2)
+end
+ plot(tt,Xb(2,:),'--b','LineWidth',2);
+ p=plot(tt,Xb(8,:),':b','LineWidth',3);
     hold on
-    h2=patch('Faces',f,'Vertices',v1,'FaceColor','k','EdgeColor','non', 'FaceAlpha',.36);
-    
-    RelX1=x12./(ones(N,1)*sum(x12)); % Relative abundances
-    
-    % Plot the relative abundances
-      p=plot(t,RelX1(1,:),'b');
-   hold on
-   p1=plot(t,RelX1(2,:),'color',PcR);
-   p2=plot(t,RelX1(3,:),'color',PcG);
-
-
+%     p3=semilogy(tt(1:100:end),Xb(7,1:100:end),'ob','MarkerSize', 10);
+%     p4=semilogy(tt(1:500:end),Xb(6,1:500:end),'sqb','MarkerSize', 10);
+    ylabel('Abundance', 'FontSize',28)
+%     
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
 % Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-    % Remove highlighted bars from the legend
-    set(get(get(h1,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-    set(get(get(h2,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
-       ylabel('Abundance')
-xlabel('Time')
-axis([0 T 0 1])
 
-set(p,'LineWidth',4)
-set(gca,'FontSize',18)
 xlabel('Time')
-%        ------------------------------------------------------------------
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
+% set(gca, 'YScale', 'log')
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(1,3,2)
+
+hold on
+    for j=1:i
+        if j==2 || j==8
+%             p1=semilogy(tt,Xr(j,:),'--','color',PcR);
+           
+        else
+                p1=plot(tt,Xr(j,:),'color',PcR);p1.Color(4)=.3;
+            %     p1=semilogy(tt,Xr(j,:),'color',PcR);p1.Color(4)=.3;
+        end
+    set(p1,'LineWidth',2)
+    end
+     plot(tt,Xr(2,:),'--','color',PcR,'LineWidth',2);
+          p1=plot(tt,Xr(8,:),':','color',PcR,'LineWidth',3);
+%     semilogy(tt(1:100:end),Xr(7,1:100:end),'o','color',PcR,'MarkerSize', 10);
+%     semilogy(tt(1:100:end),Xr(6,1:100:end),'sq','MarkerSize', 10,'LineWidth',2);
+    
+%     
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
+xlabel('Time')
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
 box on
-%%
+% set(gca, 'YScale', 'log')
+%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(1,3,3)
 
-RelX2=x22./(ones(N,1)*sum(x22)); % Relative abundances
+hold on
+    for j=1:i
+        if j==2 || j==8
+
+%             p2=semilogy(tt,Xg(j,:),'--','color',PcG);
+        else
+%     p2=semilogy(tt,Xg(j,:),'color',PcG);p2.Color(4)=.3;
+p2=plot(tt,Xg(j,:),'color',PcG);p2.Color(4)=.3;
+        end
+    set(p2,'LineWidth',2)
+    end
+        plot(tt,Xg(2,:),'--','color',PcG,'LineWidth',2);
+                p2=plot(tt,Xg(8,:),':','color',PcG,'LineWidth',3);
+%     semilogy(tt(1:100:end),Xg(7,1:100:end),'om','MarkerSize', 10);
+%     semilogy(tt(1:100:end),Xg(6,1:100:end),'sqk','MarkerSize', 10,'LineWidth',2);
+    
+    
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
+xlabel('Time')
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
+box on
+% set(gca, 'YScale', 'log')
+%%
+alpha=[1,1,1]; % order of derivatives
+T=300;
+h=0.01; % step size for computing
+for i=1:2*NXB0
+    if i>NXB0
+    x0=[XB0(i-NXB0),.1,1]; % initial conditions
+    else
+    x0=[XB0(i),.3,.1]; % initial conditions
+    end
+[t, x] = FDE_PI12_PC(alpha,@fun,t0,T,x0',h);
+RelX1=x./(ones(N,1)*sum(x)); % Relative abundances
+
+XB1(i,:,:)=RelX1;
+end
+%% Panel a 
 
 f=figure;
+f.Position = [0 0 1800 500];
 f.Renderer='painters';
-
-     
-   %%plotting relative abundance of species
-       
-            
-   p=plot(t,RelX2(1,:),'b');
-   hold on
-   p1=plot(t,RelX2(2,:),'color',PcR);
-   p2=plot(t,RelX2(3,:),'color',PcG);
-
-       ylabel('Abundance')
-
-
+% defining blindfriendly colors (red and green)
+PcR= [0.92,0.27,0.18];
+PcG= [0.18,0.40,0.14];
+   
+%        ------------------------------------------------------------------    
+    % Plot the  abundance of species
+    hold on
+    Xb1(:,:)=XB1(:,1,1:20:end);
+    Xr1(:,:)=XB1(:,2,1:20:end);
+    Xg1(:,:)=XB1(:,3,1:20:end);
+    tt=t(:,1:20:end);
+subplot(1,3,1)    
+for j=1:i
+    if j==2 || j==8
+%             p=semilogy(tt,Xb(j,:),'--b');
+                       
+    else
+%     p=semilogy(tt,Xb(j,:),'b');p.Color(4)=.3;
+    p=plot(tt,Xb1(j,:),'b');p.Color(4)=.3;
+    end
+    hold on
+    set(p,'LineWidth',2)
+end
+ plot(tt,Xb1(2,:),'--b','LineWidth',2);
+ p=plot(tt,Xb1(8,:),':b','LineWidth',3);
+    hold on
+%     p3=semilogy(tt(1:100:end),Xb(7,1:100:end),'ob','MarkerSize', 10);
+%     p4=semilogy(tt(1:500:end),Xb(6,1:500:end),'sqb','MarkerSize', 10);
+    ylabel('Abundance', 'FontSize',28)
+%     
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
 % Settings for the general plot
-set(p,'LineWidth',4)
-set(p1,'LineWidth',4)
-set(p2,'LineWidth',4)
-set(gca,'FontSize',18)
-xlabel('Time')
-axis([0 T 0 1])
 
-% % Generate legend for showing memory of each species
-legend('X_{B}/X_{total}','X_{R}/X_{total}','X_{G}/X_{total}');
+xlabel('Time')
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
+% set(gca, 'YScale', 'log')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(1,3,2)
+
+hold on
+    for j=1:i
+        if j==2 || j==8
+%             p1=semilogy(tt,Xr(j,:),'--','color',PcR);
+           
+        else
+                p1=plot(tt,Xr1(j,:),'color',PcR);p1.Color(4)=.3;
+            %     p1=semilogy(tt,Xr(j,:),'color',PcR);p1.Color(4)=.3;
+        end
+    set(p1,'LineWidth',2)
+    end
+     plot(tt,Xr1(2,:),'--','color',PcR,'LineWidth',2);
+          p1=plot(tt,Xr1(8,:),':','color',PcR,'LineWidth',3);
+%     semilogy(tt(1:100:end),Xr(7,1:100:end),'o','color',PcR,'MarkerSize', 10);
+%     semilogy(tt(1:100:end),Xr(6,1:100:end),'sq','MarkerSize', 10,'LineWidth',2);
+    
+%     
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
+xlabel('Time')
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
+box on
+% set(gca, 'YScale', 'log')
+%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(1,3,3)
+
+hold on
+    for j=1:i
+        if j==2 || j==8
+
+%             p2=semilogy(tt,Xg(j,:),'--','color',PcG);
+        else
+%     p2=semilogy(tt,Xg(j,:),'color',PcG);p2.Color(4)=.3;
+p2=plot(tt,Xg1(j,:),'color',PcG);p2.Color(4)=.3;
+        end
+    set(p2,'LineWidth',2)
+    end
+        plot(tt,Xg1(2,:),'--','color',PcG,'LineWidth',2);
+                p2=plot(tt,Xg1(8,:),':','color',PcG,'LineWidth',3);
+%     semilogy(tt(1:100:end),Xg(7,1:100:end),'om','MarkerSize', 10);
+%     semilogy(tt(1:100:end),Xg(6,1:100:end),'sqk','MarkerSize', 10,'LineWidth',2);
+    
+    
+%     yticks([0.01 0.1 1])
+% yticklabels({'-2','-1','0'})
+xlabel('Time')
+axis([0,T,.001,1])
+set(gca,'FontSize',20)
+box on
+% set(gca, 'YScale', 'log')

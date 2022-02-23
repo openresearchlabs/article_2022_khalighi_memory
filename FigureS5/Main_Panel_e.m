@@ -1,4 +1,4 @@
-%% Figure S6 panel e
+%% Figure S5 panel e
 % CH ER 
 clear 
 clc

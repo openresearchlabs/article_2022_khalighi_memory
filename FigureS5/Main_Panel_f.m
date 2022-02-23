@@ -1,4 +1,4 @@
-%% Figure S6 panel f
+%% Figure S5 panel f
 % BT CH
 clear 
 clc
