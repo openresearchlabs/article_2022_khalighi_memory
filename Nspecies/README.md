@@ -4,7 +4,7 @@
 
  ### README.md              # project overview
 
- ### Main_NSpecies.m        # Run this code
+ ### Run this code: Main.m 
 
   *  **Method2.m**            # Numerical methods for the model under given perturbations
   *  **FDE_PI12_PC.m**        # solver for fractional differential equation
