@@ -2,8 +2,6 @@
 
 ## NSpecis
 
- ### README.md              # project overview
-
  ### Run this code: Main.m 
 
   *  **Method2.m**            # Numerical methods for the model under given perturbations

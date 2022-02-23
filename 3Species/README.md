@@ -2,8 +2,6 @@
 
 ## 3specis
 
- ### README.md               project overview
-
  ### Run this code: Main.m       
 
  *  **Method1.m**            # Numerical methods for the model under given perturbations
