@@ -1,65 +1,64 @@
 %% Figure S12
+% BT CH
 clear 
 clc
-
-global n N Ki b Kij
 %% Inputs
-% Coefficients and Conditions
+global A mu
 
+order1=1:-.01:.9; % order of derivatives for BT
+order2=1:-.01:.9; % order of derivatives for CH
 
-%convergence interval
-Tol= 2e-2; % for panel a
-% Tol= 1e-6; % for panel b
+% initial conditions
+ExpRelBT=[0.17592	0.70232	0.74131	0.9864	0.98978	0.99893	0.99898];
+ExpRelCH=1-ExpRelBT;
+ExpT=0:12:12*length(ExpRelBT)-12;
+AbsIniBT=.02*ExpRelBT(1);
+AbsIniCH=.02*ExpRelCH(1);
+X0= [AbsIniBT; AbsIniCH];
 
+mu=[.626 0.468]; % growth rates
 
-N=2;
+t0=0; % intial time
+T=250; %final time
+h=.1; % step size for computing
+F=@fun; % ODE funcion described by Venturelli et. al. (https://doi.org/10.15252/msb.20178157)
+JF=@Jfun; % Jacobian of ODE
 
-order1=1:-.02:.9;
-order2=1:-.02:.9;
+A=[-0.9597 -0.0727; -0.5906 -1.242];% interaction coefficients
 
-n=2; % Hill coefficient
+%% fix points
+xx1=[(A(1,2)*mu(2)-A(2,2)*mu(1))/(A(1,1)*A(2,2)-A(1,2)*A(2,1)),...
+    (A(2,1)*mu(1)-A(1,1)*mu(2))/(A(1,1)*A(2,2)-A(1,2)*A(2,1))];
+xx2=flip(xx1);
+xx3=[0,-mu(2)/A(2,2)];
+xx4=[-mu(1)/A(1,1),0];
 
-Kij=0.1*ones(2); % interaction matrix
+x12=[xx1;xx2;xx3;xx4];
 
-Ki=1*ones(N,1); % death rate
-
-T=500; %  final time
-
-b=[1, 2]; % growth rates for cases: False, Pulse, and Periodic
-
-t0=0;
-h=.1;
-F=@funGonze; %ODE function model 1
-
-%%fix points
-x2 = 1.9987539067056423719997810984789;
-x1=100.*x2.^4 - 200.*x2.^3 + x2.^2 - 2.*x2 + 1;
-
-X0=[x1; x2]; % initial conditions
-p=34;
+% Jac=JF(1,[x1,x2]);
+% eig(Jac);
 
 M1=length(order1);
 M2=length(order2);
 ConvergT=zeros(M1,M2);
-
-IndxP=100/h;
-
 for i=1:M1
     for j=1:M2
-        
-[t,X]=FDE_PI12_PC([order1(i),order2(j)],F,t0,T,X0,h,p);
+[t,X]=FDE_PI2_IM([order1(i),order2(j)],F,JF,t0,T,X0,h);
 
-indx=find(braycd(X(:,IndxP:end),X0)<Tol);
-ConvergT(i,j)=t(indx(1))+100;
+Err=braycd(X(:,end),x12');
+[~,indFix]=min(Err);
+
+indx=find(braycd(X,x12(indFix,:)')<1e-3);
+ConvergT(i,j)=t(indx(1));
     end
 end
 
-%% Plotting
+%% plotting
 figure
 
 h=heatmap(1-order1,1-order2,ConvergT');
-h.XLabel = 'Memory of X_B';
-h.YLabel = 'Memory of X_R';
+h.XLabel = 'Memory of BT';
+h.YLabel = 'Memory of CH';
 
 ax = gca;
 axp = struct(ax);       %you will get a warning

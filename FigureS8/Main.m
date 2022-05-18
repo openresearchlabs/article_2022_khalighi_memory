@@ -1,57 +1,65 @@
 %% Figure S8
-% CH ER 
 clear 
 clc
+
+global n N Ki b Kij
 %% Inputs
-global A mu
-
-order1=1:-.01:.9; % order of derivatives for CH
-order2=1:-.01:.9; % order of derivatives for ER
-X0= [0.4; 0.2]; % initial abundances
-mu=[.468 0.151]; % growth rates
-
-t0=0; % initial time
-T=1600; % final time 
-h=.1; % step size for computing
-F=@fun; % ODE funcion described by Venturelli et. al. (https://doi.org/10.15252/msb.20178157)
-JF=@Jfun; % Jacobian of ODE
+% Coefficients and Conditions
 
 
-A=[-1.242 -.508; 1.191 -1.3219]; % interaction matrix
+%convergence interval
+Tol= 2e-2; % for panel a
+% Tol= 1e-6; % for panel b
 
-%% fix points
-xx1=[(A(1,2)*mu(2)-A(2,2)*mu(1))/(A(1,1)*A(2,2)-A(1,2)*A(2,1)),...
-    (A(2,1)*mu(1)-A(1,1)*mu(2))/(A(1,1)*A(2,2)-A(1,2)*A(2,1))];
-xx2=flip(xx1);
-xx3=[0,-mu(2)/A(2,2)];
-xx4=[-mu(1)/A(1,1),0];
 
-x12=[xx1;xx2;xx3;xx4];
+N=2;
 
-% Jac=JF(1,[x1,x2]);
-% eig(Jac);
+order1=1:-.02:.9;
+order2=1:-.02:.9;
+
+n=2; % Hill coefficient
+
+Kij=0.1*ones(2); % interaction matrix
+
+Ki=1*ones(N,1); % death rate
+
+T=500; %  final time
+
+b=[1, 2]; % growth rates for cases: False, Pulse, and Periodic
+
+t0=0;
+h=.1;
+F=@funGonze; %ODE function model 1
+
+%%fix points
+x2 = 1.9987539067056423719997810984789;
+x1=100.*x2.^4 - 200.*x2.^3 + x2.^2 - 2.*x2 + 1;
+
+X0=[x1; x2]; % initial conditions
+p=34;
 
 M1=length(order1);
 M2=length(order2);
 ConvergT=zeros(M1,M2);
+
+IndxP=100/h;
+
 for i=1:M1
     for j=1:M2
-[t,X]=FDE_PI2_IM([order1(i),order2(j)],F,JF,t0,T,X0,h);
+        
+[t,X]=FDE_PI12_PC([order1(i),order2(j)],F,t0,T,X0,h,p);
 
-Err=braycd(X(:,end),x12');
-[~,indFix]=min(Err);
-
-indx=find(braycd(X(:,20/h:end),x12(indFix,:)')<1e-4);
-ConvergT(i,j)=t(indx(1))+20;
+indx=find(braycd(X(:,IndxP:end),X0)<Tol);
+ConvergT(i,j)=t(indx(1))+100;
     end
 end
 
 %% Plotting
-
 figure
+
 h=heatmap(1-order1,1-order2,ConvergT');
-h.XLabel = 'Memory of CH';
-h.YLabel = 'Memory of ER';
+h.XLabel = 'Memory of X_B';
+h.YLabel = 'Memory of X_R';
 
 ax = gca;
 axp = struct(ax);       %you will get a warning

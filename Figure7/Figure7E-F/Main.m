@@ -1,4 +1,4 @@
-%% Figure S13
+%% Figure 7 panels E and F
 clear 
 clc
 
@@ -7,8 +7,8 @@ global A mu
 N=2;
 
 %convergence interval
-Tol= 2e-2; % for panel a
-% Tol= 7.7e-4; % for panel b
+Tol= 2e-2; % for panel E
+% Tol= 7.7e-4; % for panel F
 
 order1=1:-.02:.9;% order of derivatives for BU
 order2=1:-.02:.9; % order of derivatives for BT

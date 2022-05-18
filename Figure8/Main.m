@@ -1,4 +1,4 @@
-%% Figure 7b 
+%% Figure 8b 
 % This code solve a logistic growth curve with memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

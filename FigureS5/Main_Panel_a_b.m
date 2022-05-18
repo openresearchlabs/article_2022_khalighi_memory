@@ -48,13 +48,13 @@ Kij=0.1*ones(2); % interaction matrix
 
 Ki=1*ones(N,1); % death rate
 
-T=300; %  final time
+T=100; %  final time
 
 b=[1, 2]; % growth rates
 
 % initial conditions
-% X0=[0.9;0.15]; % for panel a 
-X0=[.8;.2]; % for panel b
+X0=[0.9;0.15]; % for panel a 
+% X0=[.8;.2]; % for panel b
 
 t0=0; % initial time
 h=0.2; % step size for computing

@@ -1,70 +1,65 @@
-%% Figure S10
+%% Figure 10
+% BU BT
 clear 
 clc
-
-global n N Ki b Kij
 %% Inputs
-% Coefficients and Conditions
+global A mu
 
-N=2;
+order1=1:-.02:.84; % order of derivatives for BU
+order2=1:-.02:.84; % order of derivatives for BT
 
-order1=1:-.02:.9;
-order2=1:-.02:.9;
+ExpRelBT=[0.5873 0.62714 0.63223 0.66755 0.67419 0.70986];
+ExpRelBU=1-ExpRelBT;
+ExpT=0:12:12*length(ExpRelBT)-12;
 
-n=2; % Hill coefficient
+% initial conditions
+AbsIniBT=.02*ExpRelBT(1);
+AbsIniBU=.02*ExpRelBU(1);
+X0= [AbsIniBU; AbsIniBT];
 
-Kij=0.1*ones(2); % interaction matrix
-
-Ki=1*ones(N,1); % death rate
-
-T=250; %  final time
-
-b=[1, 2]; % growth rates for cases: False, Pulse, and Periodic
+mu=[0.599 0.626]; %growth rates
 
 t0=0; % initial time
-h=.2; % step size for computing
-F=@funGonze;
+T=2300; % final time
+h=.1;% step size for computing
+F=@fun; % ODE funcion described by Venturelli et. al. (https://doi.org/10.15252/msb.20178157)
+JF=@Jfun; % Jacobian of ODE
 
-%%fix points
-x2 = 1.9987539067056423719997810984789;
-x1=100.*x2.^4 - 200.*x2.^3 + x2.^2 - 2.*x2 + 1;
+A=[-0.9059 -0.9377;-0.972 -0.9597]; % interaction coefficients
 
-X0=[x1; x2]; % initial conditions
+%% fix points
+xx1=[(A(1,2)*mu(2)-A(2,2)*mu(1))/(A(1,1)*A(2,2)-A(1,2)*A(2,1)),...
+    (A(2,1)*mu(1)-A(1,1)*mu(2))/(A(1,1)*A(2,2)-A(1,2)*A(2,1))];
+xx2=flip(xx1);
+xx3=[0,-mu(2)/A(2,2)];
+xx4=[-mu(1)/A(1,1),0];
 
+x12=[xx1;xx2;xx3;xx4];
+
+% Jac=JF(1,[x1,x2]);
+% eig(Jac);
 
 M1=length(order1);
 M2=length(order2);
-Resistance=zeros(M1,M2);
-
-
-
+ConvergT=zeros(M1,M2);
 for i=1:M1
     for j=1:M2
-        tic
-        p=34.5; %perturb
-while 1
-[t,X]=FDE_PI12_PC([order1(i),order2(j)],F,t0,T,X0,h,p);
+[t,X]=FDE_PI2_IM([order1(i),order2(j)],F,JF,t0,T,X0,h);
 
-Df=diff(X(:,end-1:end)');
+Err=braycd(X(:,end),x12');
+[~,indFix]=min(Err);
 
-if Df(1)<=0 && Df(2)>=0
-    p=p+0.1;
-else
-    Resistance(i,j)=p-0.1;
-    break
-end
-
-end
-toc
+indx=find(braycd(X,x12(indFix,:)')<5e-3);
+ConvergT(i,j)=t(indx(1));
     end
 end
 
 %% plotting
-figure
 
-h=heatmap(1-order1,1-order2,Resistance');
-h.XLabel = 'Memory of X_B';
-h.YLabel = 'Memory of X_R';
+figure
+h=heatmap(1-order1,1-order2,ConvergT');
+h.XLabel = 'Memory of BU';
+h.YLabel = 'Memory of BT';
 
 ax = gca;
 axp = struct(ax);       %you will get a warning
